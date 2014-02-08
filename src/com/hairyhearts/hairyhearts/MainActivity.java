@@ -28,12 +28,16 @@ import android.app.Activity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
 	private GNConfig config;
 	private TextView song_info;
+	private TextView key_textview;
+	private EditText msg_ori;
+	private TextView msg_encoded;
 	private Button fp_button;
 
 	RequestQueue queue;
@@ -72,6 +76,10 @@ public class MainActivity extends Activity {
 
 		public void GNResultReady(GNSearchResult result) {
 			song_info = (TextView) findViewById(R.id.song_info);
+			key_textview = (TextView) findViewById(R.id.key);
+			msg_ori = (EditText) findViewById(R.id.msg_ori);
+			msg_encoded = (TextView) findViewById(R.id.msg_encoded);
+
 			if (result.isFingerprintSearchNoMatchStatus()) {
 				song_info.setText("no match");
 			} else {
@@ -126,7 +134,7 @@ public class MainActivity extends Activity {
 								public void onResponse(JSONObject response) {
 									// TODO Auto-generated method stub
 									//Log.i("HairyHearts", " Response " + response.toString());
-									song_info.setText("Response => "+response.toString());
+									//song_info.setText("Response => "+response.toString());
 									String snippet;
 									try {
 										snippet = response.getJSONObject("message").getJSONObject("body")
@@ -137,7 +145,23 @@ public class MainActivity extends Activity {
 										e.printStackTrace();
 										snippet = "Nulla";
 									}
-									song_info.setText("Key => "+ snippet);
+									key_textview.setText("Key => "+ snippet);
+
+									String msgToDecode = msg_ori.getText().toString();
+									String msgEnc = "";
+									try {
+										Coding encoder = new Coding(snippet);
+										msgEnc = encoder.encrypt(msgToDecode);
+										msg_encoded.setText(msgEnc);
+										Log.i("HHearts", " Decoded " + encoder.decrypt(msgEnc));
+
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+										msg_encoded.setText("Error");
+
+
+									}
 
 								}
 							}, new Response.ErrorListener() {
